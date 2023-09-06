@@ -21,14 +21,22 @@ public class BossAttackManager : MonoBehaviour
     [SerializeField] private int enemyCount;
     [SerializeField] private float DistanceVariation = 3f;
 
+    public Action OnEnemySpawn;
+
     void Start()
     {
+        GameEventManager.PlayerDied += () =>
+        {
+            this.gameObject.SetActive(false);
+        };
         StartCoroutine(WaitAndAttack());
 
         //Add attack 1 to action selection
+        
         ActionSelection.Add(() => {
             StartCoroutine(SpawnRoots());
         });
+        
 
         //add attack 2 to action selection
         ActionSelection.Add(() => {
@@ -55,6 +63,7 @@ public class BossAttackManager : MonoBehaviour
         {
             yield return new WaitForSeconds(secondsBetweenRootAttacks);
             var go = Instantiate(rootPrefab);
+            OnEnemySpawn?.Invoke();
             go.transform.position = player.transform.position;
         }
         StartCoroutine(WaitAndAttack());
@@ -69,6 +78,8 @@ public class BossAttackManager : MonoBehaviour
 
             //spawn mf in
             var go = Instantiate(enemyPrefab);
+            go.GetComponent<SpookyAI>().Init(player);
+            OnEnemySpawn?.Invoke();
             float dp = DistanceVariation;
             Vector3 offset = new Vector3(
                 UnityEngine.Random.Range(-dp, dp),

@@ -9,8 +9,13 @@ public class Clock : MonoBehaviour
 
     private float time = 0f;
     public Action resetTimer;
+    private bool stop = false;
     public void Awake()
     {
+        GameEventManager.PlayerDied += () =>
+        {
+            stop = true;
+        };
         resetTimer += () =>
         {
             time = 0f;
@@ -23,6 +28,7 @@ public class Clock : MonoBehaviour
 
     public void Update()
     {
+        if (stop) return;
         time += Time.deltaTime;
         UpdateClock();
     }
